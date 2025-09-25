@@ -1,4 +1,3 @@
-import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -18,71 +17,60 @@ repositories {
     google()
 }
 
-fun generateGitBuild(): String {
-    try {
-        val processBuilder = ProcessBuilder("git", "describe", "--always")
-        val output = File.createTempFile("git-build", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().trim()
-    } catch (_: Exception) {
-        return "NoGitSystemAvailable"
-    }
+fun generateGitBuild(): String = try {
+    val processBuilder = ProcessBuilder("git", "describe", "--always")
+    val output = File.createTempFile("git-build", "")
+    processBuilder.redirectOutput(output)
+    val process = processBuilder.start()
+    process.waitFor()
+    output.readText().trim()
+} catch (_: Exception) {
+    "NoGitSystemAvailable"
 }
 
-fun generateGitRemote(): String {
-    try {
-        val processBuilder = ProcessBuilder("git", "remote", "get-url", "origin")
-        val output = File.createTempFile("git-remote", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().trim()
-    } catch (_: Exception) {
-        return "NoGitSystemAvailable"
-    }
+fun generateGitRemote(): String = try {
+    val processBuilder = ProcessBuilder("git", "remote", "get-url", "origin")
+    val output = File.createTempFile("git-remote", "")
+    processBuilder.redirectOutput(output)
+    val process = processBuilder.start()
+    process.waitFor()
+    output.readText().trim()
+} catch (_: Exception) {
+    "NoGitSystemAvailable"
 }
 
-fun generateDate(): String {
-    val stringBuilder: StringBuilder = StringBuilder()
-    // showing only date prevents app to rebuild everytime
-    stringBuilder.append(SimpleDateFormat("yyyy.MM.dd").format(Date()))
-    return stringBuilder.toString()
-}
+fun generateDate(): String =
+    SimpleDateFormat("yyyy.MM.dd").format(Date())
 
 fun isMaster(): Boolean = !Versions.appVersion.contains("-")
 
-fun gitAvailable(): Boolean {
-    try {
-        val processBuilder = ProcessBuilder("git", "--version")
-        val output = File.createTempFile("git-version", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().isNotEmpty()
-    } catch (_: Exception) {
-        return false
-    }
+fun gitAvailable(): Boolean = try {
+    val processBuilder = ProcessBuilder("git", "--version")
+    val output = File.createTempFile("git-version", "")
+    processBuilder.redirectOutput(output)
+    val process = processBuilder.start()
+    process.waitFor()
+    output.readText().isNotEmpty()
+} catch (_: Exception) {
+    false
 }
 
-fun allCommitted(): Boolean {
-    try {
-        val processBuilder = ProcessBuilder("git", "status", "-s")
-        val output = File.createTempFile("git-comited", "")
-        processBuilder.redirectOutput(output)
-        val process = processBuilder.start()
-        process.waitFor()
-        return output.readText().replace(Regex("""(?m)^\s*(M|A|D|\?\?)\s*.*?\.idea\/codeStyles\/.*?\s*$"""), "")
-            // ignore all files added to project dir but not staged/known to GIT
-            .replace(Regex("""(?m)^\s*(\?\?)\s*.*?\s*$"""), "").trim().isEmpty()
-    } catch (_: Exception) {
-        return false
-    }
+fun allCommitted(): Boolean = try {
+    val processBuilder = ProcessBuilder("git", "status", "-s")
+    val output = File.createTempFile("git-committed", "")
+    processBuilder.redirectOutput(output)
+    val process = processBuilder.start()
+    process.waitFor()
+    output.readText()
+        .replace(Regex("""(?m)^\s*(M|A|D|\?\?)\s*.*?\.idea\/codeStyles\/.*?\s*$"""), "")
+        .replace(Regex("""(?m)^\s*(\?\?)\s*.*?\s*$"""), "")
+        .trim()
+        .isEmpty()
+} catch (_: Exception) {
+    false
 }
 
 android {
-
     namespace = "app.aaps"
     ndkVersion = Versions.ndkVersion
 
@@ -96,16 +84,14 @@ android {
         buildConfigField("String", "HEAD", "\"${generateGitBuild()}\"")
         buildConfigField("String", "COMMITTED", "\"${allCommitted()}\"")
 
-        // For Dagger injected instrumentation tests in app module
         testInstrumentationRunner = "app.aaps.runners.InjectedTestRunner"
     }
 
-    // --- Flavors ---
+    // מוסיפים ממד חדש כדי להפריד עם/בלי Eopatch
     flavorDimensions.add("standard")
-    flavorDimensions.add("pump") // ⭐ ממד חדש לפיצול Eopatch
+    flavorDimensions.add("pump")
 
     productFlavors {
-        // ממד "standard" – כפי שהיה
         create("full") {
             isDefault = true
             applicationId = "info.nightscout.androidaps"
@@ -140,7 +126,7 @@ android {
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_blueowl"
         }
 
-        // ממד "pump" – חדש: עם/בלי Eopatch
+        // Flavors חדשים לממד pump
         create("withEopatch") {
             dimension = "pump"
             buildConfigField("boolean", "WITH_EOPATCH", "true")
@@ -153,7 +139,6 @@ android {
 
     useLibrary("org.apache.http.legacy")
 
-    //Deleting it causes a binding error
     buildFeatures {
         dataBinding = true
         buildConfig = true
@@ -161,14 +146,10 @@ android {
 }
 
 allprojects {
-    repositories {
-    }
+    repositories {}
 }
 
 dependencies {
-    // in order to use internet"s versions you"d need to enable Jetifier again
-    // https://github.com/nightscout/graphview.git
-    // https://github.com/nightscout/iconify.git
     implementation(project(":shared:impl"))
     implementation(project(":core:data"))
     implementation(project(":core:objects"))
@@ -200,8 +181,10 @@ dependencies {
     implementation(project(":pump:danars"))
     implementation(project(":pump:danar"))
     implementation(project(":pump:diaconn"))
-    // ⭐ Eopatch נטען רק ב-withEopatch (לא בבילד ל-Android 10)
-    withEopatchImplementation(project(":pump:eopatch"))
+
+    // Eopatch רק אם בוחרים flavor עם Eopatch
+    add("withEopatchImplementation", project(":pump:eopatch"))
+
     implementation(project(":pump:medtrum"))
     implementation(project(":pump:equil"))
     implementation(project(":pump:insight"))
@@ -220,14 +203,10 @@ dependencies {
     androidTestImplementation(libs.org.skyscreamer.jsonassert)
 
     kspAndroidTest(libs.com.google.dagger.android.processor)
-
-    /* Dagger2 */
     ksp(libs.com.google.dagger.android.processor)
     ksp(libs.com.google.dagger.compiler)
 
-    // MainApp
     api(libs.com.uber.rxdogtag2.rxdogtag)
-    // Remote config
     api(libs.com.google.firebase.config)
 }
 
@@ -236,8 +215,9 @@ println("isMaster: ${isMaster()}")
 println("gitAvailable: ${gitAvailable()}")
 println("allCommitted: ${allCommitted()}")
 println("-------------------")
+
 if (!gitAvailable()) {
-    throw GradleException("GIT system is not available. On Windows try to run Android Studio as an Administrator. Check if GIT is installed and Studio have permissions to use it")
+    throw GradleException("GIT system is not available. On Windows try to run Android Studio as Administrator. Check if GIT is installed and Studio has permissions to use it")
 }
 if (isMaster() && !allCommitted()) {
     throw GradleException("There are uncommitted changes. Clone sources again as described in wiki and do not allow gradle update")
