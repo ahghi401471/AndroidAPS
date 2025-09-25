@@ -100,8 +100,12 @@ android {
         testInstrumentationRunner = "app.aaps.runners.InjectedTestRunner"
     }
 
+    // --- Flavors ---
     flavorDimensions.add("standard")
+    flavorDimensions.add("pump") // ⭐ ממד חדש לפיצול Eopatch
+
     productFlavors {
+        // ממד "standard" – כפי שהיה
         create("full") {
             isDefault = true
             applicationId = "info.nightscout.androidaps"
@@ -134,6 +138,16 @@ android {
             versionName = Versions.appVersion + "-aapsclient"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_blueowl"
             manifestPlaceholders["appIconRound"] = "@mipmap/ic_blueowl"
+        }
+
+        // ממד "pump" – חדש: עם/בלי Eopatch
+        create("withEopatch") {
+            dimension = "pump"
+            buildConfigField("boolean", "WITH_EOPATCH", "true")
+        }
+        create("noEopatch") {
+            dimension = "pump"
+            buildConfigField("boolean", "WITH_EOPATCH", "false")
         }
     }
 
@@ -186,8 +200,8 @@ dependencies {
     implementation(project(":pump:danars"))
     implementation(project(":pump:danar"))
     implementation(project(":pump:diaconn"))
-    // 🔕 נטרול Eopatch כדי לא לדרוש minSdk 30
-    // implementation(project(":pump:eopatch"))
+    // ⭐ Eopatch נטען רק ב-withEopatch (לא בבילד ל-Android 10)
+    withEopatchImplementation(project(":pump:eopatch"))
     implementation(project(":pump:medtrum"))
     implementation(project(":pump:equil"))
     implementation(project(":pump:insight"))
@@ -207,9 +221,7 @@ dependencies {
 
     kspAndroidTest(libs.com.google.dagger.android.processor)
 
-    /* Dagger2 - We are going to use dagger.android which includes
-     * support for Activity and fragment injection so we need to include
-     * the following dependencies */
+    /* Dagger2 */
     ksp(libs.com.google.dagger.android.processor)
     ksp(libs.com.google.dagger.compiler)
 
