@@ -186,7 +186,8 @@ dependencies {
     implementation(project(":pump:danars"))
     implementation(project(":pump:danar"))
     implementation(project(":pump:diaconn"))
-    implementation(project(":pump:eopatch"))
+    // 🔕 נטרול Eopatch כדי לא לדרוש minSdk 30
+    // implementation(project(":pump:eopatch"))
     implementation(project(":pump:medtrum"))
     implementation(project(":pump:equil"))
     implementation(project(":pump:insight"))
@@ -203,7 +204,6 @@ dependencies {
     androidTestImplementation(project(":shared:tests"))
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.org.skyscreamer.jsonassert)
-
 
     kspAndroidTest(libs.com.google.dagger.android.processor)
 
