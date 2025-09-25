@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- עוקף את דרישת minSdk של epopatch-core -->
-    <uses-sdk tools:overrideLibrary="app.aaps.pump.epopatch.core"/>
+    <!-- (הוסר ה-uses-sdk override) -->
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
@@ -73,41 +72,29 @@
             android:name="app.aaps.activities.PreferencesActivity"
             android:exported="false"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name="app.aaps.activities.HistoryBrowseActivity"
             android:exported="false"
             android:theme="@style/AppTheme" />
 
-        <!-- Receive new BG readings from other local apps -->
         <receiver
             android:name="app.aaps.receivers.DataReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <!-- Receiver from xDrip -->
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
-                <!-- Receiver from 640g uploader -->
                 <action android:name="com.eveningoutpost.dexdrip.NS_EMULATOR" />
-                <!-- Receiver from glimp -->
                 <action android:name="it.ct.glicemia.ACTION_GLUCOSE_MEASURED" />
-                <!-- Receiver from Dexcom -->
                 <action android:name="com.dexcom.cgm.EXTERNAL_BROADCAST" />
                 <action android:name="com.dexcom.g7.EXTERNAL_BROADCAST" />
-                <!-- Receiver from Poctech -->
                 <action android:name="com.china.poctech.data" />
-                <!-- Receiver from Tomato -->
                 <action android:name="com.fanqies.tomatofn.BgEstimate" />
-                <!-- Receiver from GlucoRx Aidex -->
                 <action android:name="com.microtechmd.cgms.aidex.action.BgEstimate" />
-                <!-- Receiver from patched Ottai app -->
                 <action android:name="info.nightscout.androidaps.action.OTTAI_APP" />
-                <!-- Receiver from patched Syai Tag app -->
                 <action android:name="info.nightscout.androidaps.action.SYAI_TAG_APP" />
             </intent-filter>
         </receiver>
 
-        <!-- Receive new SMS messages -->
         <receiver
             android:name="app.aaps.receivers.SmsReceiver"
             android:enabled="true"
@@ -118,10 +105,8 @@
             </intent-filter>
         </receiver>
 
-        <!-- Receive ignore 5m, 15m, 30m requests for carb notifications -->
         <receiver android:name="app.aaps.plugins.aps.loop.CarbSuggestionReceiver" />
 
-        <!-- Auto start -->
         <receiver
             android:name="app.aaps.receivers.AutoStartReceiver"
             android:enabled="true"
@@ -144,7 +129,6 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
-
     </application>
 
 </manifest>
