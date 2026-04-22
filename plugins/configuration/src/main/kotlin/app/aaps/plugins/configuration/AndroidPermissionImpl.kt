@@ -7,6 +7,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
@@ -73,6 +74,10 @@ class AndroidPermissionImpl @Inject constructor(
     override fun askForPermission(activity: FragmentActivity, permission: String) = askForPermission(activity, arrayOf(permission))
 
     override fun permissionNotGranted(context: Context, permission: String): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+            (permission == Manifest.permission.BLUETOOTH_CONNECT || permission == Manifest.permission.BLUETOOTH_SCAN)
+        ) return false
+
         var selfCheck = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
         if (permission == Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS) {
             if (!permissionBatteryOptimizationFailed) {
