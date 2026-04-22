@@ -8,7 +8,7 @@ object Versions {
     const val versionCode = 1500
 
     const val compileSdk = 36
-    const val minSdk = 29 // Android 10 (Q)
+    const val minSdk = 30 // Android 11 (R)
     const val targetSdk = 32
     const val wearMinSdk = minSdk
     const val wearTargetSdk = 30
