@@ -224,6 +224,53 @@ class OmnipodDashPodStateManagerImpl @Inject constructor(
             it.startTime + it.durationInMinutes * 60 * 1000 > System.currentTimeMillis()
         } == true
 
+    private val bolusPulsesDelivered: Short?
+        get() = podState.bolusPulsesDelivered
+
+    private val basalPulsesDelivered: Short?
+        get() = pulsesDelivered?.let { total -> bolusPulsesDelivered?.let { bolus -> (total - bolus).toShort() } }
+
+    private val basalDelivered: Double
+        get() = (basalPulsesDelivered ?: 0) * PodConstants.POD_PULSE_BOLUS_UNITS
+
+    private val basalDrift: Double
+        get() = basalDelivered - (podState.basalExpected ?: basalDelivered)
+
+    override fun needsBasalCorrection(): Boolean {
+        val correctionThreshold = -PodConstants.POD_PULSE_BOLUS_UNITS / 2
+        if (!isActivationCompleted) return false
+        if (isSuspended || isPodKaput) return false
+        podState.lastBasalCorrectionTime?.let {
+            if (System.currentTimeMillis() - it < 2 * 60 * 1000L) return false
+        }
+        val drift = basalDrift
+        if (drift >= PodConstants.POD_PULSE_BOLUS_UNITS * 2 || drift <= -PodConstants.POD_PULSE_BOLUS_UNITS * 2) {
+            logger.warn(LTag.PUMP, "Resetting basal drift: drift=${"%.3f".format(drift)}U")
+            podState.basalExpected = basalDelivered
+            store()
+            return false
+        }
+        if (drift > correctionThreshold) return false
+        if (tempBasal?.rate == 0.0) {
+            val timeSinceLastBolus = podState.lastBolus?.startTime?.let { System.currentTimeMillis() - it }
+            if (timeSinceLastBolus == null || timeSinceLastBolus >= 5 * 60 * 1000L) return false
+        }
+        return true
+    }
+
+    override var lastBasalCorrectionTime: Long?
+        get() = podState.lastBasalCorrectionTime
+        set(value) {
+            podState.lastBasalCorrectionTime = value
+            store()
+        }
+
+    override var basalCorrectionInProgress: Boolean
+        get() = podState.basalCorrectionInProgress
+        set(value) {
+            podState.basalCorrectionInProgress = value
+        }
+
     override var basalProgram: BasalProgram?
         get() = podState.basalProgram
         set(basalProgram) {
@@ -607,6 +654,12 @@ class OmnipodDashPodStateManagerImpl @Inject constructor(
         if (podState.activationTime == null) {
             podState.activationTime = System.currentTimeMillis() - (response.minutesSinceActivation * 60_000)
         }
+        if (podState.bolusPulsesDelivered == null && isActivationCompleted) {
+            podState.bolusPulsesDelivered = response.totalPulsesDelivered
+        }
+        if (podState.basalExpected == null && isActivationCompleted) {
+            podState.basalExpected = basalDelivered
+        }
 
         store()
         rxBus.send(EventOmnipodDashPumpValuesChanged())
@@ -776,6 +829,10 @@ class OmnipodDashPodStateManagerImpl @Inject constructor(
         var basalProgram: BasalProgram? = null,
         var tempBasal: OmnipodDashPodStateManager.TempBasal? = null,
         var activeCommand: OmnipodDashPodStateManager.ActiveCommand? = null,
-        var lastBolus: OmnipodDashPodStateManager.LastBolus? = null
+        var lastBolus: OmnipodDashPodStateManager.LastBolus? = null,
+        var bolusPulsesDelivered: Short? = null,
+        var basalExpected: Double? = null,
+        var lastBasalCorrectionTime: Long? = null,
+        @Transient var basalCorrectionInProgress: Boolean = false
     ) : Serializable
 }
