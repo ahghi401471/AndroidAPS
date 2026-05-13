@@ -326,6 +326,7 @@ class EquilManager @Inject constructor(
                 (historyGet as Object).wait(historyGet.timeOut.toLong())
             }
             aapsLogger.debug(LTag.PUMPCOMM, "loadHistory end: ")
+            if (!historyGet.cmdSuccess) return -1
             return historyGet.currentIndex
         } catch (ex: Exception) {
             ex.printStackTrace()
