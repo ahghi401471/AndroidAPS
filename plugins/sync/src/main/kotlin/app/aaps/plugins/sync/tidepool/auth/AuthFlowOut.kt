@@ -48,18 +48,29 @@ class AuthFlowOut @Inject constructor(
         private const val REDIRECT_URI = "aaps://callback/tidepool"
         private const val INTEGRATION_BASE_URL = "https://auth.integration.tidepool.org/realms/integration"
         private const val PRODUCTION_BASE_URL = "https://auth.tidepool.org/realms/tidepool"
+        private const val CUSTOM_BROWSER_PACKAGE = "com.tidbrowser"
     }
 
-    private val allowAllBrowsers = object : BrowserMatcher {
-        override fun matches(descriptor: BrowserDescriptor): Boolean = true
+    private class PackageNameBrowserMatcher(
+        private val packageName: String
+    ) : BrowserMatcher {
+        override fun matches(descriptor: BrowserDescriptor): Boolean =
+            descriptor.packageName == packageName && descriptor.useCustomTab
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun buildAppAuthConfiguration(pm: android.content.pm.PackageManager): AppAuthConfiguration {
+        val matcher = PackageNameBrowserMatcher(CUSTOM_BROWSER_PACKAGE)
+
+        return AppAuthConfiguration.Builder()
+            .setBrowserMatcher(matcher)
+            .build()
     }
 
     val authService: AuthorizationService =
         AuthorizationService(
             context,
-            AppAuthConfiguration.Builder()
-                .setBrowserMatcher(allowAllBrowsers)
-                .build()
+            buildAppAuthConfiguration(context.packageManager)
         )
 
     enum class ConnectionStatus {
