@@ -1,7 +1,6 @@
 package app.aaps.plugins.sync.tidepool.auth
 
 import android.app.PendingIntent
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.util.Base64
@@ -17,7 +16,6 @@ import app.aaps.plugins.sync.tidepool.keys.TidepoolBooleanKey
 import app.aaps.plugins.sync.tidepool.keys.TidepoolStringNonKey
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
@@ -51,7 +49,7 @@ class AuthFlowOut @Inject constructor(
         private const val INTEGRATION_BASE_URL = "https://auth.integration.tidepool.org/realms/integration"
         private const val PRODUCTION_BASE_URL = "https://auth.tidepool.org/realms/tidepool"
         private const val CUSTOM_BROWSER_PACKAGE = "com.tidbrowser"
-   }
+    }
 
     private class PackageNameBrowserMatcher(
         private val packageName: String
@@ -66,7 +64,13 @@ class AuthFlowOut @Inject constructor(
 
         return AppAuthConfiguration.Builder()
             .setBrowserMatcher(matcher)
-                .build()
+            .build()
+    }
+
+    val authService: AuthorizationService =
+        AuthorizationService(
+            context,
+            buildAppAuthConfiguration(context.packageManager)
         )
 
     enum class ConnectionStatus {
@@ -163,16 +167,11 @@ class AuthFlowOut @Inject constructor(
                         .setPrompt("login")
                         .build()
 
-                try {
-                    authService.performAuthorizationRequest(
-                        authRequest,
-                        PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE),
-                        PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE)
-                    )
-                } catch (e: ActivityNotFoundException) {
-                    aapsLogger.error(LTag.TIDEPOOL, "No browser available for Tidepool login", e)
-                    rxBus.send(EventTidepoolStatus("No compatible browser installed. Please install Chrome or Firefox to log in to Tidepool."))
-                }
+                authService.performAuthorizationRequest(
+                    authRequest,
+                    PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE),
+                    PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE)
+                )
             })
     }
 }
