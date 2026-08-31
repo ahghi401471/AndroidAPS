@@ -1,6 +1,7 @@
 package app.aaps.plugins.sync.tidepool.auth
 
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.util.Base64
@@ -16,6 +17,7 @@ import app.aaps.plugins.sync.tidepool.keys.TidepoolBooleanKey
 import app.aaps.plugins.sync.tidepool.keys.TidepoolStringNonKey
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
+import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
@@ -48,18 +50,46 @@ class AuthFlowOut @Inject constructor(
         private const val REDIRECT_URI = "aaps://callback/tidepool"
         private const val INTEGRATION_BASE_URL = "https://auth.integration.tidepool.org/realms/integration"
         private const val PRODUCTION_BASE_URL = "https://auth.tidepool.org/realms/tidepool"
+        private const val CUSTOM_BROWSER_PACKAGE = "com.tidbrowser"
+
+        /**
+         * True when a token refresh failed only because of the network or the server. The saved
+         * credentials are still good, so the next upload can try the silent refresh again. A refused
+         * credential comes back as an OAuth token error instead (for example `invalid_grant`) and still
+         * needs a new login in the browser.
+         *
+         * Three general errors of AppAuth mean "the connection failed", never "your login is bad":
+         * - network error
+         * - server error
+         * - JSON deserialization error
+         */
+        fun isTransientTokenError(ex: AuthorizationException?): Boolean =
+            ex != null && ex.type == AuthorizationException.TYPE_GENERAL_ERROR &&
+                (ex.code == AuthorizationException.GeneralErrors.NETWORK_ERROR.code ||
+                    ex.code == AuthorizationException.GeneralErrors.SERVER_ERROR.code ||
+                    ex.code == AuthorizationException.GeneralErrors.JSON_DESERIALIZATION_ERROR.code)
     }
 
-    private val allowAllBrowsers = object : BrowserMatcher {
-        override fun matches(descriptor: BrowserDescriptor): Boolean = true
+    private class PackageNameBrowserMatcher(
+        private val packageName: String
+    ) : BrowserMatcher {
+        override fun matches(descriptor: BrowserDescriptor): Boolean =
+            descriptor.packageName == packageName && descriptor.useCustomTab
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun buildAppAuthConfiguration(pm: android.content.pm.PackageManager): AppAuthConfiguration {
+        val matcher = PackageNameBrowserMatcher(CUSTOM_BROWSER_PACKAGE)
+
+        return AppAuthConfiguration.Builder()
+            .setBrowserMatcher(matcher)
+            .build()
     }
 
     val authService: AuthorizationService =
         AuthorizationService(
             context,
-            AppAuthConfiguration.Builder()
-                .setBrowserMatcher(allowAllBrowsers)
-                .build()
+            buildAppAuthConfiguration(context.packageManager)
         )
 
     enum class ConnectionStatus {
@@ -156,11 +186,16 @@ class AuthFlowOut @Inject constructor(
                         .setPrompt("login")
                         .build()
 
-                authService.performAuthorizationRequest(
-                    authRequest,
-                    PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE),
-                    PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE)
-                )
+                try {
+                    authService.performAuthorizationRequest(
+                        authRequest,
+                        PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE),
+                        PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE)
+                    )
+                } catch (e: ActivityNotFoundException) {
+                    aapsLogger.error(LTag.TIDEPOOL, "Tidepool Browser is not available for Tidepool login", e)
+                    rxBus.send(EventTidepoolStatus("Tidepool Browser is not available for Tidepool login."))
+                }
             })
     }
 }
