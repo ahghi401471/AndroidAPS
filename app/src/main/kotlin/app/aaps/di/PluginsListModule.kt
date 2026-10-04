@@ -207,12 +207,6 @@ abstract class PluginsListModule {
     @Binds
     @PumpDriver
     @IntoMap
-    @IntKey(156)
-    abstract fun bindEopatchPumpPlugin(plugin: EopatchPumpPlugin): PluginBase
-
-    @Binds
-    @PumpDriver
-    @IntoMap
     @IntKey(160)
     abstract fun bindMedtrumPlugin(plugin: MedtrumPlugin): PluginBase
 
