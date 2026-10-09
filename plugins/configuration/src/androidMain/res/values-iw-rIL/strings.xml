@@ -52,4 +52,25 @@
     <!-- Google Drive error messages (used by GoogleDriveManager) -->
     <!-- Provider-agnostic cloud storage strings -->
     <!-- Authorization status strings -->
+    <string name="status_label">מצב:</string>
+    <string name="setupwizard_sensitivity_url">https://wiki.aaps.app/en/latest/DailyLifeWithAaps/SensitivityDetectionAndCob.html</string>
+    <string name="setupwizard_aps_description">בחרו אחד מהאלגוריתמים הזמינים. הם מסודרים מהישן לחדש. אלגוריתם חדש יותר בדרך כלל בעל יכולות מתקדמות יותר. הקפידו לקרוא את תיעוד OpenAPS ולהגדיר את האלגוריתם לפני השימוש.</string>
+    <string name="open_objectives">פתיחת היעדים</string>
+    <string name="setupwizard_permissions">הרשאות</string>
+    <string name="setupwizard_profile_info">צרו פרופיל עם קצבי הבזאל, יחס הפחמימות (IC), מקדם הרגישות (ISF) וערכי היעד שלכם. אפשר להוסיף פרופילים נוספים בהמשך.</string>
+    <string name="setupwizard_permissions_info">AAPS זקוק לגישה לאחסון ולהרשאות כדי לפעול כראוי. יש לתת את ההרשאות הנדרשות שלהלן.</string>
+    <string name="setupwizard_client_control_title">שליטה ממכשיר לקוח</string>
+    <string name="setupwizard_client_control_info">צמדו מכשירי לקוח כדי שיוכלו לשלוח פקודות חתומות למכשיר הראשי הזה דרך Nightscout. זו הדרך החדשה והמומלצת לשליטה מרחוק ב־AAPS.</string>
+    <string name="setupwizard_ns_receive_info">קבלת טיפולים ונתונים ישירות מ־Nightscout (דרך מאובטחת פחות) כבויה כעת כברירת מחדל. פתחו את ההגדרות שלהלן רק אם עדיין יש בהן צורך. הן נדרשות להזנת נתונים דרך NS או אפליקציות חיצוניות.</string>
+    <string name="setupwizard_open_ns_receive_settings">קבלת נתונים מ־Nightscout</string>
+    <string name="setupwizard_pair_with_master_info">צמדו מכשיר לקוח זה ל־AAPS הראשי כדי שיוכל לשלוח פקודות בערוץ מאובטח.</string>
+    <string name="setupwizard_pairing_ws_warning">לצימוד נדרש חיבור WebSocket ל־Nightscout. חזרו לשלב הקודם והפעילו אותו תחילה.</string>
+    <string name="setupwizard_pairing_status_master">מכשירי לקוח מצומדים: %1$d</string>
+    <string name="setupwizard_pairing_status_master_none">טרם צומדו מכשירי לקוח</string>
+    <string name="setupwizard_pairing_status_client_paired">מצומד למכשיר ראשי</string>
+    <string name="setupwizard_pairing_status_client_not_paired">טרם בוצע צימוד</string>
+    <string name="configbuilder_sync_description">תוספים להעלאת נתונים, סנכרון ותקשורת.</string>
+    <string name="loading">טוען…</string>
+    <string name="warning_wrong_directory_selected">נבחרה תיקייה שגויה</string>
+    <string name="warning_wrong_directory_message">בחרתם בתיקיית המשנה \"%1$s\" במקום בתיקיית AAPS הראשית. יש לבחור בתיקיית האב AAPS. האפליקציה תיצור ותנהל את תיקיות המשנה אוטומטית.</string>
 </resources>

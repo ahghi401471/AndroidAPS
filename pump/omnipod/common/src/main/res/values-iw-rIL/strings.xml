@@ -169,4 +169,22 @@
         <item quantity="two">התראות פוד: %1$s</item>
         <item quantity="other">התראות פוד: %1$s</item>
     </plurals>
+    <string name="omnipod_common_preferences_notification_delivery_suspended_sound_enabled">צליל כשהתראה על השהיית מתן האינסולין מופעלת</string>
+    <string name="omnipod_dash_use_bonding">צימוד Bluetooth</string>
+    <string name="omnipod_dash_use_bonding_summary">נסו אפשרות זו רק אם הפוד אינו שומר על חיבור יציב. הטלפון יציג בקשות צימוד שיש לאשר. השאירו כבוי אם הפוד מתחבר היטב. אין השפעה בגרסאות שמתחת ל־Android 15.</string>
+    <string name="omnipod_common_pdm_notification_label">התראת PDM</string>
+    <string name="omnipod_common_pdm_ref">קוד: %1$s</string>
+    <string name="omnipod_common_pdm_notification_header_reservoir_empty">המכל ריק</string>
+    <string name="omnipod_common_pdm_notification_text_reservoir_empty">מתן האינסולין נעצר. יש להחליף את הפוד עכשיו.</string>
+    <string name="omnipod_common_pdm_notification_header_auto_off">כיבוי אוטומטי</string>
+    <string name="omnipod_common_pdm_notification_text_auto_off">מתן האינסולין נעצר. ה־PDM והפוד לא תקשרו זה עם זה ב־4 השעות האחרונות. כדי לחדש את מתן האינסולין, יש להחליף את הפוד עכשיו.</string>
+    <string name="omnipod_common_pdm_notification_header_pod_expired">תוקף הפוד פג</string>
+    <string name="omnipod_common_pdm_notification_text_pod_expired">מתן האינסולין נעצר. יש להחליף את הפוד עכשיו.</string>
+    <string name="omnipod_common_pdm_notification_header_occluded">זוהתה חסימה</string>
+    <string name="omnipod_common_pdm_notification_text_occluded">מתן האינסולין נעצר. יש להחליף את הפוד עכשיו ולבדוק את הסוכר בדם.</string>
+    <string name="omnipod_common_pdm_notification_header_pod_error">שגיאת פוד</string>
+    <string name="omnipod_common_pdm_notification_text_pod_error">מתן האינסולין נעצר. יש להחליף את הפוד עכשיו.</string>
+    <string name="omnipod_common_cmd_set_fake_suspended_tbr">הגדרת בזאל זמני מדומה למצב השהיה</string>
+    <string name="omnipod_common_cmd_cancel_fake_suspended_tbr">ביטול בזאל זמני מדומה למצב השהיה</string>
+    <string name="omnipod_common_overview_pod_hard_end_date">מועד עצירה סופי של הפוד</string>
 </resources>

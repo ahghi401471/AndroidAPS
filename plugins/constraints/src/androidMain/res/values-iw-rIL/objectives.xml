@@ -71,4 +71,35 @@
     <string name="requirementnotmet">דרישות המשימה לא נענו</string>
     <string name="what_i_ve_learned">מה שלמדתי:</string>
     <string name="verify_master_password">וודאו שאתם יודעים וזוכרים את הסיסמה הראשית</string>
+    <string name="objectives_maxiobzero_gate">הפעילו לולאה סגורה במצב השהיה עקב סוכר נמוך (כלומר, IOB מרבי = 0 מוגדר אוטומטית) במשך כמה ימים, ללא אירועי LGS רבים מדי.</string>
+    <string name="objectives_maxiob_learned">עדכנו את ה־MaxIOB עם גדילת הילד. אין לאפשר למערכת לתת יותר אינסולין מכפי שניתן לכסות באוכל — ערך גבוה מאוד אינו רעיון טוב. במצב פשוט, ה־IOB המרבי מחושב אוטומטית.</string>
+    <string name="maxiobset">IOB מרבי הוגדר כראוי (לא נדרש במצב פשוט)</string>
+    <string name="objectives_auto_gate">קראו בתיעוד כיצד האוטומציה פועלת. הגדירו כללים פשוטים ראשונים. במקום לבצע פעולה, הגדירו ש־AAPS יציג התראה בלבד. לאחר שווידאתם שהאוטומציה מופעלת בזמן הנכון, החליפו את ההתראה בפעולה אמיתית. (https://wiki.aaps.app/en/latest/DailyLifeWithAaps/Automations.html)</string>
+    <string name="objectives_useprofileswitch">הגדירו פרופיל 90% למשך 10 דקות</string>
+    <string name="objectives_usedisconnectpump">דמו מקלחת. נתקו את המשאבה למשך שעה</string>
+    <string name="objectives_usetemptarget">צרו יעד זמני מותאם אישית למשך 10 דקות</string>
+    <string name="objectives_usescale">השתמשו בגלילה או בהגדלה בגרף הסוכר</string>
+    <string name="objectives_exam_learned_profileswitch">שימוש באחוזים אינו משנה את יעדי הסוכר, אך מתאים את הבזאל, ה־ISF וה־IC כדי לתת יותר אינסולין (מעל 100%) או פחות אינסולין (מתחת ל־100%).</string>
+    <string name="objectives_exam_learned_concentration1">שימוש באינסולין U200 עם פרופיל 50% מחייב המרה קבועה עבור בולוסים חיצוניים בעט. כל הדוחות הרגילים של AAPS או NS לא ישקפו את הערכים האמיתיים, ויהיה צורך להמיר אותם ליחידות בינלאומיות עבור הצוות המטפל.</string>
+    <string name="objectives_exam_learned_concentration2">מעבר מ־U200 עם פרופיל 50% ל־U200 עם תכונת ריכוז האינסולין מחייב ליצור פרופיל מוגבר חדש, להשבית DynISF למשך שבוע ולהתרגל לחשוב ביחידות בינלאומיות.</string>
+    <string name="objectives_exam_learned_concentration3">אפשר לשנות את ריכוז האינסולין רק עם החלפת האינסולין או הפאץ׳. חשוב במיוחד, במשאבות עם צינורית, לא להשתמש בממשק המשאבה כדי לתת בולוסים ישירות ממנה.</string>
+    <string name="disconnectpump_hint" formatted="false">https://wiki.aaps.app/en/latest/UsefulLinks/FAQ.html#what-to-do-when-taking-a-shower-or-bath</string>
+    <string name="usetemptarget_hint" formatted="false">https://wiki.aaps.app/en/latest/DailyLifeWithAaps/AapsScreens.html#the-homescreen</string>
+    <string name="useaction_hint" formatted="false">https://wiki.aaps.app/en/latest/SettingUpAaps/ConfigBuilder.html</string>
+    <string name="usescale_hint" formatted="false">https://wiki.aaps.app/en/latest/DailyLifeWithAaps/AapsScreens.html#the-homescreen</string>
+    <string name="objectives_collapse">פחות</string>
+    <string name="objectives_expand">עוד</string>
+    <string name="objectives_no_learned">לא נרשמו לקחים עבור יעד זה.</string>
+    <string name="objectives_open_exam">פתיחת המבחן</string>
+    <string name="objectives_exam_question_progress">שאלה %1$d מתוך %2$d</string>
+    <string name="objectives_exam_reset">איפוס</string>
+    <string name="objectives_state_done">הושלם</string>
+    <string name="objectives_state_in_progress">בתהליך</string>
+    <string name="objectives_state_not_started">טרם התחיל</string>
+    <string name="objectives_state_locked">נעול</string>
+    <string name="objectives_exam_correct_answer">תשובה נכונה</string>
+    <string name="objectives_exam_previous">הקודם</string>
+    <string name="objectives_exam_next">הבא</string>
+    <string name="objectives_exam_next_unanswered">השאלה הבאה שטרם נענתה</string>
+    <string name="objectives_show_hint">רמז</string>
 </resources>

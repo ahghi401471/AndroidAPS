@@ -37,4 +37,23 @@
     <string name="time_last_week">בשבוע שעבר</string>
     <string name="time_last_month">בחודש שעבר</string>
     <!-- Pump History -->
+    <string name="pump_cmd_desc_get_settings">אחזר הגדרות</string>
+    <string name="pump_cmd_desc_get_firmware">קריאת קושחת המשאבה</string>
+    <string name="pump_cmd_desc_get_basal_profile">אחזר פרופיל בזאלי</string>
+    <string name="pump_cmd_desc_set_basal_profile">הגדרת פרופיל בזאלי</string>
+    <string name="pump_cmd_desc_get_tbr">קבל בזאלי זמני</string>
+    <string name="pump_cmd_desc_cancel_tbr">ביטול בזאלי זמני</string>
+    <string name="pump_cmd_desc_set_tbr">הגדרת בזאלי זמני</string>
+    <string name="pump_cmd_desc_set_bolus">הגדרת בולוס</string>
+    <string name="pump_cmd_desc_get_bolus">קריאת בולוס</string>
+    <string name="pump_cmd_desc_cancel_bolus">ביטול בולוס</string>
+    <string name="pump_cmd_desc_get_remaining_insulin">אחזור אינסולין שנותר</string>
+    <string name="pump_cmd_desc_get_battery_status">מצב הסוללה</string>
+    <string name="pump_cmd_desc_get_time">קריאת השעה</string>
+    <string name="pump_cmd_desc_set_time">הגדרת שעה</string>
+    <string name="pump_cmd_desc_get_pump_status">קריאת מצב המשאבה</string>
+    <string name="pump_cmd_desc_get_history">קריאת היסטוריה</string>
+    <string name="pump_cmd_desc_get_history_params">קריאת היסטוריה %s</string>
+    <string name="pump_cmd_desc_custom">פקודה מותאמת אישית</string>
+    <string name="time_last_24_hours">24 השעות האחרונות</string>
 </resources>

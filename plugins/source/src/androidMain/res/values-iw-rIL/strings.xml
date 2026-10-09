@@ -28,4 +28,28 @@
     <!-- Instara preferences -->
     <!-- Notification Reader -->
     <!-- Permission rationales -->
+    <string name="syai_tag_app">Syai</string>
+    <string name="description_source_patched_syai_tag_app">קבלת נתוני סוכר מאפליקציית Syai/Ottai.</string>
+    <string name="patched_si_app">SI App</string>
+    <string name="description_source_patched_si_app">קבלת נתוני סוכר מאפליקציית Sibionic SI המותאמת או מאפליקציית Sibionics.</string>
+    <string name="patched_sino_app">Sino App</string>
+    <string name="description_source_patched_sino_app">קבלת נתוני סוכר מאפליקציית Sino המותאמת.</string>
+    <string name="instara_app">Instara</string>
+    <string name="description_source_instara_app">קבלת ערכי סוכר מאפליקציית Instara.</string>
+    <string name="pref_title_instara_history_request">בקשת נתונים היסטוריים מ־Instara</string>
+    <string name="pref_summary_instara_history_request">בקשת נתונים היסטוריים שעשויים להיות חסרים, ברקע</string>
+    <string name="notification_reader">קורא התראות</string>
+    <string name="description_source_notification_reader">קריאת ערכי סוכר מהתראות של אפליקציות CGM רשמיות (Dexcom, Medtronic, Eversense וכדומה).</string>
+    <string name="permission_dexcom_title">Dexcom CGM</string>
+    <string name="permission_dexcom_description">האפליקציה זקוקה להרשאה לקבלת נתוני CGM מאפליקציית Dexcom</string>
+    <string name="permission_notification_listener_title">גישה להתראות</string>
+    <string name="permission_notification_listener_description">נדרש לקריאת ערכי סוכר מהתראות של אפליקציות CGM</string>
+    <string name="aidex">MicroTech CGM App</string>
+    <string name="description_source_aidex">קבלת ערכי CGM מ־LinX, LinX vista, Equil G. Smart 2, Diaexpert 2 וכדומה.</string>
+    <string name="aidex_sensor_expired">תוקף החיישן פג; יש להחליפו בחיישן חדש</string>
+    <string name="aidex_sensor_error">שגיאת חיישן; יש לבדוק את מצב החיישן</string>
+    <string name="aidex_sensor_stabilizing">החיישן מתייצב; יש להמתין…</string>
+    <string name="aidex_sensor_replace">נדרשת החלפת חיישן; יש להחליפו בחיישן חדש בהקדם האפשרי</string>
+    <string name="aidex_signal_lost">האות מהחיישן אבד; יש לבדוק את החיבור</string>
+    <string name="a11y_bg_duplicate">קריאה כפולה</string>
 </resources>

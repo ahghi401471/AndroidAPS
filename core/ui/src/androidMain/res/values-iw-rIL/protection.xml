@@ -26,4 +26,12 @@
     <string name="current_master_password">סיסמה ראשית נוכחית</string>
     <string name="master_password_not_set">הסיסמה הראשית לא הוגדרה</string>
     <string name="aaps_directory_not_selected">לא נבחרה תיקיית AAPS</string>
+    <string name="datastore_password_cleared">סיסמת הייצוא השמורה נמחקה!</string>
+    <string name="protection_password_hint">הזינו כאן סיסמה</string>
+    <string name="protection_pin_hint">הזינו כאן קוד PIN</string>
+    <string name="auth_hint_master_password">הזינו סיסמה ראשית</string>
+    <string name="auth_hint_master_or_pin">הזינו סיסמה ראשית או קוד PIN</string>
+    <string name="auth_hint_master_or_password">הזינו סיסמה ראשית או סיסמה מותאמת אישית</string>
+    <string name="use_pin_password">שימוש בקוד PIN או בסיסמה</string>
+    <string name="aaps_directory_access_lost">הגישה לתיקיית AAPS אבדה, ולכן ההגדרות אינן נשמרות עוד בטלפון. יש לבחור שוב את התיקייה.</string>
 </resources>

@@ -36,4 +36,12 @@
     <string name="cancel_temp_basal_result_is_uncertain">ביטול הבאזלי הזמני אינו וודאי</string>
     <string name="unconfirmed_resumedelivery_command_please_refresh_pod_status">פקודת חידוש ההזרקה לא אושרה. יש לרענן את סטטוס הפוד</string>
     <string name="cancelling_temp_basal_might_have_failed">ביטול הבזאלי הזמני נכשל. אם בזאלי זמני הוחל קודם לכן, ייתכן שהוא בוטל. נא לרענן באופן ידני את סטטוס הפוד מהלשונית Omnipod.</string>
+    <string name="omnipod_dash_failed_to_connect">החיבור נכשל</string>
+    <string name="omnipod_dash_found_too_many_pods">נמצאו יותר מדי פודים</string>
+    <string name="omnipod_dash_scan_failed">הסריקה נכשלה</string>
+    <string name="omnipod_dash_connection_lost">החיבור נותק</string>
+    <string name="omnipod_common_history_bolus_value_labeled">%1$s (%2$s)</string>
+    <string name="omnipod_common_bolus_type_smb">SMB</string>
+    <string name="omnipod_common_bolus_type_basal_correction">תיקון בזאל</string>
+    <string name="omnipod_common_bolus_type_priming">מבצע מילוי ראשוני</string>
 </resources>

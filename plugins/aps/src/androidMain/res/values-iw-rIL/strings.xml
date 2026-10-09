@@ -92,4 +92,9 @@
     <string name="pump_disconnected">המשאבה מנותקת</string>
     <!--    autoISF -->
     <string name="autoISF_settings_title">הגדרות רגישות אוטומטית</string>
+    <string name="description_auto_isf">אלגוריתם ניסיוני למשתמשים מתקדמים עם הרחבות AutoISF</string>
+    <string name="autotune_peak">שיא הפעילות</string>
+    <string name="zero_basal_not_set">המשאבה לא קיבלה את הבזאל הזמני של אפס. ייתכן שהיא עדיין נותנת אינסולין בזאלי. יש לבדוק את המשאבה.</string>
+    <string name="open_loop_suggestion_too_old">הצעה זו ישנה מדי. דבר לא נשלח למשאבה. המתינו להצעה הבאה.</string>
+    <string name="smb_delivery_settings_title">הגדרות מתן SMB</string>
 </resources>

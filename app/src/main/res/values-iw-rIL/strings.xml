@@ -4,4 +4,12 @@
     <string name="identification_not_set">אמצעי הזיהוי אינו מוגדר במצב מפתחים</string>
     <string name="select">בחר</string>
     <string name="set">הגדר</string>
+    <string name="migrating_preferences">מעביר את ההעדפות…</string>
+    <string name="optimizing_database">ממטב את מסד הנתונים…</string>
+    <string name="initializing_plugins">מאתחל תוספים…</string>
+    <string name="initializing">מאתחל…</string>
+    <string name="migrating_profile_switches">מעביר את החלפות הפרופיל…</string>
+    <string name="migrating_effective_profile_switches">מעביר את החלפות הפרופיל שהוחלו בפועל…</string>
+    <string name="migrating_boluses">מעביר את הבולוסים…</string>
+    <string name="insulin_migration_default_used">ברשומות הישנות לא הוגדר סוג אינסולין ולא היה פרופיל פעיל, ולכן נעשה בהן שימוש ב־%1$s. בדקו את הגדרות האינסולין — רשומות שכבר הועברו לא יעודכנו לאחר מכן.</string>
 </resources>

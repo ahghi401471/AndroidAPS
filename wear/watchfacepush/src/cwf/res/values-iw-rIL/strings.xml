@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="simplify_ui_always_on">תצוגה תמידית פשוטה</string>
+    <string name="simplify_ui_always_on_reader">הצגת שעון וקריאות בתצוגה פשוטה כשהמסך נשאר דולק, במקום העיצוב האישי שלכם</string>
+</resources>

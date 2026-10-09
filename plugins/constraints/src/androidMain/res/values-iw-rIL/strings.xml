@@ -39,4 +39,7 @@
     <string name="doyouwantresetstart">האם ברצונכם לאפס את התחלת המשימה? אתם עלולים לאבד את התקדמותכם במשימה.</string>
     <string name="objectives_button_unfinish">ביטול השלמה</string>
     <string name="objectives_button_unstart">ביטול התחלה</string>
+    <string name="version_expire">תוקף גרסה %1$s יפוג ב־%2$s והיא תעבור למצב LGS</string>
+    <string name="safety">בטיחות</string>
+    <string name="bg_doubled_lgs">מצב LGS עקב ערכים כפולים במקור הסוכר</string>
 </resources>

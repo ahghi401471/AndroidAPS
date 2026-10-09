@@ -113,4 +113,26 @@
     <string name="diaconn_g8_errorcode_36">הפסקת באזלי זמני נדחת כאשר לא פעיל באזלי זמני</string>
     <string name="diaconn_g8_cloudsend_summary">שלח יומני משאבה לענן Diaconn.</string>
     <string name="diaconn_g8_cloudsend_title">סנכרון Diaconn Cloud </string>
+    <string name="resetpairing">לאפס את נתוני הצימוד?</string>
+    <string name="largetimedifftitle">הפרש שעות גדול</string>
+    <string name="waitingforbolusend">ממתין לסיום המשוער של הבולוס</string>
+    <string name="gettingbolusstatus">מקבל סטטוס בולוס</string>
+    <string name="processinghistory">מעבד אירוע</string>
+    <string name="diaconn_g8_lgorelease">חידוש הבזאל (%s)</string>
+    <string name="diaconn_g8_logdualnormalsuccess">החלק המיידי של הבולוס המשולב הושלם</string>
+    <string name="diaconn_g8_logdualsquarestart">התחלת החלק המוארך של הבולוס המשולב</string>
+    <string name="diaconn_g8_logdualsquaresuccess">החלק המוארך של הבולוס המשולב הושלם</string>
+    <string name="diaconn_g8_logsquarestart">התחלת בולוס מוארך</string>
+    <string name="diaconn_g8_logsquaresuccess">הבולוס המוארך הושלם</string>
+    <string name="diaconn_g8_errorcode_1">לא ניתן לבצע קריאה עקב שגיאת CRC בחבילת הנתונים.</string>
+    <string name="bolus_speed_1">1 U/min</string>
+    <string name="bolus_speed_2">2 U/min</string>
+    <string name="bolus_speed_3">3 U/min</string>
+    <string name="bolus_speed_4">4 U/min</string>
+    <string name="bolus_speed_5">5 U/min</string>
+    <string name="bolus_speed_6">6 U/min</string>
+    <string name="bolus_speed_7">7 U/min</string>
+    <string name="bolus_speed_8">8 U/min</string>
+    <string name="diaconn_pairing_successful">הצימוד הצליח!</string>
+    <string name="diaconn_pairing_successful_message">המשאבה מחוברת כעת ומוכנה לשימוש.</string>
 </resources>

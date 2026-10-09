@@ -5,4 +5,7 @@
     <string name="avg_smoothing_name">החלקת ממוצע</string>
     <string name="description_avg_smoothing">"אלגוריתם החלקת ממוצע, הערך החדש ביותר לא מושפע"</string>
     <string name="no_smoothing_name">ללא החלקה</string>
+    <string name="description_no_smoothing">"השתמשו בזה כשכבר מתקבלים נתונים מסוננים, למשל מ־BYODA G6."</string>
+    <string name="UKF_name">מסנן קלמן (UKF)</string>
+    <string name="description_UKF">"אלגוריתם מתקדם עם התאמת רעש אוטומטית והחלקת RTS."</string>
 </resources>

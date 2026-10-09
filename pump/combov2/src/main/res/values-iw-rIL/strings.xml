@@ -106,4 +106,10 @@
     <string name="combov2_cannot_pair_driver_not_initialized_explanation">לא ניתן לבצע צימוד משום שמנהל ההתקן לא מאותחל. זה קורה בדר\"כ בגלל שהרשאת הבלוטות\' הדרושה, לא ניתנה. חזרו אחורה, אשרו את הרשאת הבלוטות\' ונסו צימוד בשנית.</string>
     <string name="combov2_bluetooth_disabled">לא ניתן להפעיל את מנהל ההתקן - בלוטות\' מושבת</string>
     <string name="combov2_bluetooth_not_supported">מנהל ההתקן לא מתפקד - המכשיר לא תומך בבלוטות\'</string>
+    <string name="combov2_confirm_cancel_pairing_message">לבטל את הצימוד?</string>
+    <string name="combov2_confirm_unpair_message">לבטל את הצימוד למשאבה?</string>
+    <string name="combov2_battery_empty">ריקה</string>
+    <string name="combov2_battery_low">נמוך</string>
+    <string name="combov2_battery_full">מלאה</string>
+    <string name="combov2_unknown_tbr_detected">זוהה בזאל זמני לא מוכר והוא נעצר; אחוז: %1$d%%; משך שנותר: %2$s</string>
 </resources>
