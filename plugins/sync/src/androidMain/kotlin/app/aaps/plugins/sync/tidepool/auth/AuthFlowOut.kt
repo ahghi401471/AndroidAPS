@@ -15,9 +15,6 @@ import app.aaps.plugins.sync.tidepool.events.EventTidepoolStatus
 import app.aaps.plugins.sync.tidepool.events.EventTidepoolUpdateGUI
 import app.aaps.plugins.sync.tidepool.keys.TidepoolBooleanKey
 import app.aaps.plugins.sync.tidepool.keys.TidepoolStringNonKey
-import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.SingleIn
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
@@ -25,10 +22,12 @@ import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ResponseTypeValues
-import net.openid.appauth.browser.BrowserAllowList
-import net.openid.appauth.browser.VersionedBrowserMatcher
+import net.openid.appauth.browser.BrowserDescriptor
+import net.openid.appauth.browser.BrowserMatcher
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * JamOrHam
@@ -36,9 +35,8 @@ import java.security.MessageDigest
  *
  * Handler for new style Tidepool openid auth
  */
-@SingleIn(AppScope::class)
-@Inject
-class AuthFlowOut(
+@Singleton
+class AuthFlowOut @Inject constructor(
     private val aapsLogger: AAPSLogger,
     private val preferences: Preferences,
     private val context: Context,
@@ -52,6 +50,7 @@ class AuthFlowOut(
         private const val REDIRECT_URI = "aaps://callback/tidepool"
         private const val INTEGRATION_BASE_URL = "https://auth.integration.tidepool.org/realms/integration"
         private const val PRODUCTION_BASE_URL = "https://auth.tidepool.org/realms/tidepool"
+        private const val CUSTOM_BROWSER_PACKAGE = "com.tidbrowser"
 
         /**
          * True when a token refresh failed only because of the network or the server. The saved
@@ -60,10 +59,9 @@ class AuthFlowOut(
          * needs a new login in the browser.
          *
          * Three general errors of AppAuth mean "the connection failed", never "your login is bad":
-         * - network error (`{"type":0,"code":3}`, the case reported in issue #4989)
+         * - network error
          * - server error
-         * - JSON error, which is what we get when the answer is not JSON at all. A hotel login page or
-         *   an HTML error page of a proxy looks like this, so it is a connection problem as well.
+         * - JSON deserialization error
          */
         fun isTransientTokenError(ex: AuthorizationException?): Boolean =
             ex != null && ex.type == AuthorizationException.TYPE_GENERAL_ERROR &&
@@ -72,27 +70,27 @@ class AuthFlowOut(
                     ex.code == AuthorizationException.GeneralErrors.JSON_DESERIALIZATION_ERROR.code)
     }
 
-    /**
-     * Built on first use, not at construction.
-     *
-     * `AuthorizationService`'s constructor inspects the installed browsers, which needs a real Android
-     * environment - as a property initializer it made **building the object graph** do that, and threw
-     * `ExceptionInInitializerError` in every plain-JVM graph test once Metro started constructing this
-     * class. Nothing needs it before the first authorization request.
-     */
-    val authService: AuthorizationService by lazy {
-        AuthorizationService(
-            context, AppAuthConfiguration.Builder()
-                .setBrowserMatcher(
-                    BrowserAllowList(
-                        VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
-                        VersionedBrowserMatcher.FIREFOX_CUSTOM_TAB,
-                        VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
-                    )
-                )
-                .build()
-        )
+    private class PackageNameBrowserMatcher(
+        private val packageName: String
+    ) : BrowserMatcher {
+        override fun matches(descriptor: BrowserDescriptor): Boolean =
+            descriptor.packageName == packageName && descriptor.useCustomTab
     }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun buildAppAuthConfiguration(pm: android.content.pm.PackageManager): AppAuthConfiguration {
+        val matcher = PackageNameBrowserMatcher(CUSTOM_BROWSER_PACKAGE)
+
+        return AppAuthConfiguration.Builder()
+            .setBrowserMatcher(matcher)
+            .build()
+    }
+
+    val authService: AuthorizationService =
+        AuthorizationService(
+            context,
+            buildAppAuthConfiguration(context.packageManager)
+        )
 
     enum class ConnectionStatus {
         NONE, BLOCKED, NOT_LOGGED_IN, NO_SESSION, FETCHING_TOKEN, SESSION_ESTABLISHED, FAILED
@@ -195,8 +193,8 @@ class AuthFlowOut(
                         PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE)
                     )
                 } catch (e: ActivityNotFoundException) {
-                    aapsLogger.error(LTag.TIDEPOOL, "No browser available for Tidepool login", e)
-                    rxBus.send(EventTidepoolStatus("No compatible browser installed. Please install Chrome or Firefox to log in to Tidepool."))
+                    aapsLogger.error(LTag.TIDEPOOL, "Tidepool Browser is not available for Tidepool login", e)
+                    rxBus.send(EventTidepoolStatus("Tidepool Browser is not available for Tidepool login."))
                 }
             })
     }
