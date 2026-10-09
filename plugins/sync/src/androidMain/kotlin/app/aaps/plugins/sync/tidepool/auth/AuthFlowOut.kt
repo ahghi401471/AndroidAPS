@@ -26,8 +26,9 @@ import net.openid.appauth.browser.BrowserDescriptor
 import net.openid.appauth.browser.BrowserMatcher
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import javax.inject.Inject
-import javax.inject.Singleton
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 
 /**
  * JamOrHam
@@ -35,8 +36,9 @@ import javax.inject.Singleton
  *
  * Handler for new style Tidepool openid auth
  */
-@Singleton
-class AuthFlowOut @Inject constructor(
+@SingleIn(AppScope::class)
+@Inject
+class AuthFlowOut(
     private val aapsLogger: AAPSLogger,
     private val preferences: Preferences,
     private val context: Context,
