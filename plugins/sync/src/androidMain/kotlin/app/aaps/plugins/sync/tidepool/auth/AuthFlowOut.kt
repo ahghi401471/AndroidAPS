@@ -8,13 +8,14 @@ import android.util.Base64
 import androidx.core.net.toUri
 import app.aaps.core.interfaces.logging.AAPSLogger
 import app.aaps.core.interfaces.logging.LTag
-import app.aaps.core.interfaces.rx.bus.RxBus
 import app.aaps.core.keys.interfaces.Preferences
 import app.aaps.core.objects.crypto.CryptoUtil
-import app.aaps.plugins.sync.tidepool.events.EventTidepoolStatus
-import app.aaps.plugins.sync.tidepool.events.EventTidepoolUpdateGUI
+import app.aaps.plugins.sync.tidepool.compose.TidepoolRepository
 import app.aaps.plugins.sync.tidepool.keys.TidepoolBooleanKey
 import app.aaps.plugins.sync.tidepool.keys.TidepoolStringNonKey
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
@@ -26,176 +27,243 @@ import net.openid.appauth.browser.BrowserDescriptor
 import net.openid.appauth.browser.BrowserMatcher
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
- * JamOrHam
- *
- *
- * Handler for new style Tidepool openid auth
+ * Handler for Tidepool OpenID authentication.
  */
-@Singleton
-class AuthFlowOut @Inject constructor(
+@SingleIn(AppScope::class)
+@Inject
+class AuthFlowOut(
     private val aapsLogger: AAPSLogger,
     private val preferences: Preferences,
     private val context: Context,
     private val cryptoUtil: CryptoUtil,
-    private val rxBus: RxBus
+    private val tidepoolRepository: TidepoolRepository
 ) {
 
     companion object {
 
         private const val CLIENT_ID = "aaps"
         private const val REDIRECT_URI = "aaps://callback/tidepool"
-        private const val INTEGRATION_BASE_URL = "https://auth.integration.tidepool.org/realms/integration"
-        private const val PRODUCTION_BASE_URL = "https://auth.tidepool.org/realms/tidepool"
+        private const val INTEGRATION_BASE_URL =
+            "https://auth.integration.tidepool.org/realms/integration"
+        private const val PRODUCTION_BASE_URL =
+            "https://auth.tidepool.org/realms/tidepool"
+
         private const val CUSTOM_BROWSER_PACKAGE = "com.tidbrowser"
 
         /**
-         * True when a token refresh failed only because of the network or the server. The saved
-         * credentials are still good, so the next upload can try the silent refresh again. A refused
-         * credential comes back as an OAuth token error instead (for example `invalid_grant`) and still
-         * needs a new login in the browser.
-         *
-         * Three general errors of AppAuth mean "the connection failed", never "your login is bad":
-         * - network error
-         * - server error
-         * - JSON deserialization error
+         * Network, server and JSON errors can be transient.
+         * Rejected credentials still require a new login.
          */
         fun isTransientTokenError(ex: AuthorizationException?): Boolean =
-            ex != null && ex.type == AuthorizationException.TYPE_GENERAL_ERROR &&
-                (ex.code == AuthorizationException.GeneralErrors.NETWORK_ERROR.code ||
-                    ex.code == AuthorizationException.GeneralErrors.SERVER_ERROR.code ||
-                    ex.code == AuthorizationException.GeneralErrors.JSON_DESERIALIZATION_ERROR.code)
+            ex != null &&
+                ex.type == AuthorizationException.TYPE_GENERAL_ERROR &&
+                (
+                    ex.code == AuthorizationException.GeneralErrors.NETWORK_ERROR.code ||
+                        ex.code == AuthorizationException.GeneralErrors.SERVER_ERROR.code ||
+                        ex.code == AuthorizationException.GeneralErrors.JSON_DESERIALIZATION_ERROR.code
+                    )
     }
 
     private class PackageNameBrowserMatcher(
         private val packageName: String
     ) : BrowserMatcher {
+
         override fun matches(descriptor: BrowserDescriptor): Boolean =
             descriptor.packageName == packageName && descriptor.useCustomTab
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun buildAppAuthConfiguration(pm: android.content.pm.PackageManager): AppAuthConfiguration {
-        val matcher = PackageNameBrowserMatcher(CUSTOM_BROWSER_PACKAGE)
-
-        return AppAuthConfiguration.Builder()
-            .setBrowserMatcher(matcher)
-            .build()
-    }
-
-    val authService: AuthorizationService =
+    /**
+     * Created on first use to avoid inspecting Android browsers
+     * while constructing the dependency graph.
+     */
+    val authService: AuthorizationService by lazy {
         AuthorizationService(
             context,
-            buildAppAuthConfiguration(context.packageManager)
+            AppAuthConfiguration.Builder()
+                .setBrowserMatcher(
+                    PackageNameBrowserMatcher(CUSTOM_BROWSER_PACKAGE)
+                )
+                .build()
         )
+    }
 
     enum class ConnectionStatus {
-        NONE, BLOCKED, NOT_LOGGED_IN, NO_SESSION, FETCHING_TOKEN, SESSION_ESTABLISHED, FAILED
+        NONE,
+        BLOCKED,
+        NOT_LOGGED_IN,
+        NO_SESSION,
+        FETCHING_TOKEN,
+        SESSION_ESTABLISHED,
+        FAILED
     }
 
     var connectionStatus: ConnectionStatus = ConnectionStatus.NONE
         private set
         get() =
             if (field == ConnectionStatus.NONE) {
-                if (authState.lastTokenResponse != null) ConnectionStatus.NO_SESSION
+                if (hasSavedLogin) ConnectionStatus.NO_SESSION
                 else ConnectionStatus.NOT_LOGGED_IN
             } else field
 
     var authState = AuthState()
 
-    fun updateConnectionStatus(newStatus: ConnectionStatus? = null, message: String? = null) {
-        aapsLogger.debug(LTag.TIDEPOOL, "updateConnectionStatus: $newStatus $message")
+    val hasSavedLogin: Boolean
+        get() = authState.lastTokenResponse != null
+
+    fun updateConnectionStatus(
+        newStatus: ConnectionStatus? = null,
+        message: String? = null
+    ) {
+        aapsLogger.debug(
+            LTag.TIDEPOOL,
+            "updateConnectionStatus: $newStatus $message"
+        )
         newStatus?.let { connectionStatus = it }
-        message?.let { rxBus.send(EventTidepoolStatus(it)) }
-        rxBus.send(EventTidepoolUpdateGUI())
+        message?.let { tidepoolRepository.addLog(it) }
+        tidepoolRepository.updateConnectionStatus(connectionStatus)
     }
 
     fun saveAuthState() {
-        preferences.put(TidepoolStringNonKey.AuthState, authState.jsonSerializeString())
+        preferences.put(
+            TidepoolStringNonKey.AuthState,
+            authState.jsonSerializeString()
+        )
     }
 
     fun eraseAuthState(message: String?) {
-        //aapsLogger.debug(LTag.TIDEPOOL, "eraseAuthState")
         preferences.put(TidepoolStringNonKey.AuthState, "")
         initAuthState()
         updateConnectionStatus(ConnectionStatus.NONE, message)
     }
 
-    @Synchronized fun initAuthState() {
+    @Synchronized
+    fun initAuthState() {
         authState = AuthState()
+
         try {
-            // Set from configuration if exists
-            val serviceConfig = preferences.get(TidepoolStringNonKey.ServiceConfiguration)
-            if (serviceConfig.isNotEmpty())
-                authState = AuthState(AuthorizationServiceConfiguration.fromJson(serviceConfig))
-            // Check if we have an authorized state
-            val savedAuthState = preferences.get(TidepoolStringNonKey.AuthState)
+            val serviceConfig =
+                preferences.get(TidepoolStringNonKey.ServiceConfiguration)
+
+            if (serviceConfig.isNotEmpty()) {
+                authState = AuthState(
+                    AuthorizationServiceConfiguration.fromJson(serviceConfig)
+                )
+            }
+
+            val savedAuthState =
+                preferences.get(TidepoolStringNonKey.AuthState)
+
             if (savedAuthState.isNotEmpty()) {
                 authState = AuthState.jsonDeserialize(savedAuthState)
             }
         } catch (e: Exception) {
-            aapsLogger.error(LTag.TIDEPOOL, "Failed to restore auth state, resetting", e)
+            aapsLogger.error(
+                LTag.TIDEPOOL,
+                "Failed to restore auth state, resetting",
+                e
+            )
             authState = AuthState()
             preferences.put(TidepoolStringNonKey.AuthState, "")
             preferences.put(TidepoolStringNonKey.ServiceConfiguration, "")
         }
-        aapsLogger.debug(LTag.TIDEPOOL, "Using auth state : ${authState.jsonSerializeString()}")
+
+        // Do not log access or refresh tokens.
+        aapsLogger.debug(
+            LTag.TIDEPOOL,
+            "Using auth state: authorized=${authState.isAuthorized} " +
+                "needsTokenRefresh=${authState.needsTokenRefresh}"
+        )
     }
 
     @Synchronized
     fun clearAllSavedData() {
-        //aapsLogger.debug(LTag.TIDEPOOL, "clearAllSavedData")
         preferences.put(TidepoolStringNonKey.ServiceConfiguration, "")
         eraseAuthState("Credentials cleared")
     }
 
     fun doTidePoolInitialLogin(@Suppress("unused") from: String) {
-        //aapsLogger.debug(LTag.TIDEPOOL, "doTidePoolInitialLogin $from")
-        rxBus.send(EventTidepoolStatus(("Opening login screen")))
+        tidepoolRepository.addLog("Opening login screen")
+
         AuthorizationServiceConfiguration.fetchFromIssuer(
-            if (preferences.get(TidepoolBooleanKey.UseTestServers)) INTEGRATION_BASE_URL.toUri()
-            else PRODUCTION_BASE_URL.toUri(),
-            AuthorizationServiceConfiguration.RetrieveConfigurationCallback { serviceConfiguration, exception ->
+            if (preferences.get(TidepoolBooleanKey.UseTestServers)) {
+                INTEGRATION_BASE_URL.toUri()
+            } else {
+                PRODUCTION_BASE_URL.toUri()
+            },
+            AuthorizationServiceConfiguration.RetrieveConfigurationCallback {
+                    serviceConfiguration, exception ->
+
                 if (exception != null || serviceConfiguration == null) {
-                    rxBus.send(EventTidepoolStatus(("Failed to fetch configuration $exception")))
+                    tidepoolRepository.addLog(
+                        "Failed to fetch configuration $exception"
+                    )
                     return@RetrieveConfigurationCallback
                 }
-                preferences.put(TidepoolStringNonKey.ServiceConfiguration, serviceConfiguration.toJsonString())
+
+                preferences.put(
+                    TidepoolStringNonKey.ServiceConfiguration,
+                    serviceConfiguration.toJsonString()
+                )
                 initAuthState()
 
                 val codeVerifierChallengeMethod = "S256"
-                val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                val encoding =
+                    Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
                 val challenge = cryptoUtil.getRandomKey(64)
-                val codeVerifier = Base64.encodeToString(challenge, encoding)
+                val codeVerifier =
+                    Base64.encodeToString(challenge, encoding)
                 val digest = MessageDigest.getInstance("SHA-256")
-                val hash = digest.digest(codeVerifier.toByteArray(StandardCharsets.UTF_8))
-                val codeChallenge = Base64.encodeToString(hash, encoding)
+                val hash = digest.digest(
+                    codeVerifier.toByteArray(StandardCharsets.UTF_8)
+                )
+                val codeChallenge =
+                    Base64.encodeToString(hash, encoding)
 
                 val authRequest =
                     AuthorizationRequest.Builder(
-                        serviceConfiguration,  // the authorization service configuration
-                        CLIENT_ID,  // the client ID, typically pre-registered and static
-                        ResponseTypeValues.CODE,  // the response_type value: we want a code
-                        REDIRECT_URI.toUri() // the redirect URI to which the auth response is sent
+                        serviceConfiguration,
+                        CLIENT_ID,
+                        ResponseTypeValues.CODE,
+                        REDIRECT_URI.toUri()
                     )
                         .setScopes("openid")
-                        .setCodeVerifier(codeVerifier, codeChallenge, codeVerifierChallengeMethod)
+                        .setCodeVerifier(
+                            codeVerifier,
+                            codeChallenge,
+                            codeVerifierChallengeMethod
+                        )
                         .setPrompt("login")
                         .build()
 
                 try {
                     authService.performAuthorizationRequest(
                         authRequest,
-                        PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE),
-                        PendingIntent.getActivity(context, 0, Intent(context, AuthFlowIn::class.java), PendingIntent.FLAG_MUTABLE)
+                        PendingIntent.getActivity(
+                            context,
+                            0,
+                            Intent(context, AuthFlowIn::class.java),
+                            PendingIntent.FLAG_MUTABLE
+                        ),
+                        PendingIntent.getActivity(
+                            context,
+                            0,
+                            Intent(context, AuthFlowIn::class.java),
+                            PendingIntent.FLAG_MUTABLE
+                        )
                     )
                 } catch (e: ActivityNotFoundException) {
-                    aapsLogger.error(LTag.TIDEPOOL, "Tidepool Browser is not available for Tidepool login", e)
-                    rxBus.send(EventTidepoolStatus("Tidepool Browser is not available for Tidepool login."))
+                    aapsLogger.error(
+                        LTag.TIDEPOOL,
+                        "Tidepool Browser is not available for Tidepool login",
+                        e
+                    )
+                    tidepoolRepository.addLog(
+                        "Tidepool Browser is not available for Tidepool login."
+                    )
                 }
-            })
+            }
+        )
     }
 }
