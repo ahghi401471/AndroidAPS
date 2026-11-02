@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +13,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -641,18 +644,21 @@ fun SecondaryGraphCompose(
         rightFirst     -> listOf(rightLayer, leftLayer)
         else           -> listOf(leftLayer, rightLayer)
     }
-    CartesianChartHost(
-        chart = rememberCartesianChart(
-            *layers.toTypedArray(),
-            startAxis = startAxis,
-            endAxis = endAxis.takeIf { rightRange != null },
-            bottomAxis = bottomAxis, decorations = decorations, getXStep = { _, _, _ -> 1.0 },
-            marker = inspectMarker, markerVisibilityListener = inspect?.visibilityListener, markerController = markerController
-        ),
-        modelProducer = modelProducer,
-        modifier = modifier.fillMaxWidth(),
-        scrollState = scrollState, zoomState = zoomState
-    )
+    // Keep the time axis and programmatic scrolling LTR in every app language.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                *layers.toTypedArray(),
+                startAxis = startAxis,
+                endAxis = endAxis.takeIf { rightRange != null },
+                bottomAxis = bottomAxis, decorations = decorations, getXStep = { _, _, _ -> 1.0 },
+                marker = inspectMarker, markerVisibilityListener = inspect?.visibilityListener, markerController = markerController
+            ),
+            modelProducer = modelProducer,
+            modifier = modifier.fillMaxWidth(),
+            scrollState = scrollState, zoomState = zoomState
+        )
+    }
 }
 
 /** The two series a basal layer always needs, for a basal with fewer than two points. */

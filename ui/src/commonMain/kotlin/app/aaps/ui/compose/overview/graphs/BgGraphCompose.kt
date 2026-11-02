@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -12,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -486,71 +489,74 @@ fun BgGraphCompose(
     // Chart — multi layer
     // =========================================================================
 
-    CartesianChartHost(
-        chart = rememberCartesianChart(
-            // Layer 0: BG (start axis, visible)
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(bgLines),
-                rangeProvider = startAxisRangeProvider,
-                verticalAxisPosition = Axis.Position.Vertical.Start
-            ),
-            // Layer 1: Basal (end axis, hidden — no endAxis parameter)
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(basalLines),
-                rangeProvider = endAxisRangeProvider,
-                verticalAxisPosition = Axis.Position.Vertical.End
-            ),
-            // Layer 2: Target line (start axis — shares BG Y-axis range)
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(targetLines),
-                rangeProvider = startAxisRangeProvider,
-                verticalAxisPosition = Axis.Position.Vertical.Start
-            ),
-            // Layer 3: EPS (start axis — Y based on profile %, same range as BG layer)
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(epsLines),
-                rangeProvider = startAxisRangeProvider,
-                verticalAxisPosition = Axis.Position.Vertical.Start
-            ),
-            // Layer 4: Activity (start axis — shares BG Y-axis range, values normalized in submitBgModel)
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(activityLines),
-                rangeProvider = startAxisRangeProvider,
-                verticalAxisPosition = Axis.Position.Vertical.Start
-            ),
-            // Layer 5: Treatment markers (start axis — drawn last, see block 6)
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(treatmentLines),
-                rangeProvider = startAxisRangeProvider,
-                verticalAxisPosition = Axis.Position.Vertical.Start
-            ),
-            startAxis = VerticalAxis.rememberStart(
-                itemPlacer = remember { NiceVerticalAxisItemPlacer() },
-                label = rememberTextComponent(
-                    style = TextStyle(color = MaterialTheme.colorScheme.onSurface),
-                    minWidth = TextComponent.MinWidth.fixed(30.dp)
+    // Keep the time axis and programmatic scrolling LTR in every app language.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                // Layer 0: BG (start axis, visible)
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(bgLines),
+                    rangeProvider = startAxisRangeProvider,
+                    verticalAxisPosition = Axis.Position.Vertical.Start
                 ),
-                guideline = LineComponent(fill = Fill(AapsTheme.generalColors.graphGrid))
-            ),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                valueFormatter = timeFormatter,
-                itemPlacer = bottomAxisItemPlacer,
-                label = rememberTextComponent(
-                    style = TextStyle(color = MaterialTheme.colorScheme.onSurface)
+                // Layer 1: Basal (end axis, hidden — no endAxis parameter)
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(basalLines),
+                    rangeProvider = endAxisRangeProvider,
+                    verticalAxisPosition = Axis.Position.Vertical.End
                 ),
-                guideline = LineComponent(fill = Fill(AapsTheme.generalColors.graphGrid))
+                // Layer 2: Target line (start axis — shares BG Y-axis range)
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(targetLines),
+                    rangeProvider = startAxisRangeProvider,
+                    verticalAxisPosition = Axis.Position.Vertical.Start
+                ),
+                // Layer 3: EPS (start axis — Y based on profile %, same range as BG layer)
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(epsLines),
+                    rangeProvider = startAxisRangeProvider,
+                    verticalAxisPosition = Axis.Position.Vertical.Start
+                ),
+                // Layer 4: Activity (start axis — shares BG Y-axis range, values normalized in submitBgModel)
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(activityLines),
+                    rangeProvider = startAxisRangeProvider,
+                    verticalAxisPosition = Axis.Position.Vertical.Start
+                ),
+                // Layer 5: Treatment markers (start axis — drawn last, see block 6)
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(treatmentLines),
+                    rangeProvider = startAxisRangeProvider,
+                    verticalAxisPosition = Axis.Position.Vertical.Start
+                ),
+                startAxis = VerticalAxis.rememberStart(
+                    itemPlacer = remember { NiceVerticalAxisItemPlacer() },
+                    label = rememberTextComponent(
+                        style = TextStyle(color = MaterialTheme.colorScheme.onSurface),
+                        minWidth = TextComponent.MinWidth.fixed(30.dp)
+                    ),
+                    guideline = LineComponent(fill = Fill(AapsTheme.generalColors.graphGrid))
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = timeFormatter,
+                    itemPlacer = bottomAxisItemPlacer,
+                    label = rememberTextComponent(
+                        style = TextStyle(color = MaterialTheme.colorScheme.onSurface)
+                    ),
+                    guideline = LineComponent(fill = Fill(AapsTheme.generalColors.graphGrid))
+                ),
+                decorations = decorations,
+                getXStep = { _, _, _ -> 1.0 },
+                marker = inspectMarker,
+                markerVisibilityListener = inspect?.visibilityListener,
+                markerController = inspect?.controller ?: defaultMarkerController
             ),
-            decorations = decorations,
-            getXStep = { _, _, _ -> 1.0 },
-            marker = inspectMarker,
-            markerVisibilityListener = inspect?.visibilityListener,
-            markerController = inspect?.controller ?: defaultMarkerController
-        ),
-        modelProducer = modelProducer,
-        modifier = modifier.fillMaxWidth(),
-        scrollState = scrollState,
-        zoomState = zoomState
-    )
+            modelProducer = modelProducer,
+            modifier = modifier.fillMaxWidth(),
+            scrollState = scrollState,
+            zoomState = zoomState
+        )
+    }
 }
 
 /** Everything the chart model of the BG graph is built from. Equal values give the same model. */

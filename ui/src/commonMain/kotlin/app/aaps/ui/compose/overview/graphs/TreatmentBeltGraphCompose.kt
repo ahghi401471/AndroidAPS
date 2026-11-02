@@ -4,12 +4,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -406,39 +409,42 @@ fun TreatmentBeltGraphCompose(
         CartesianLayerRangeProvider.fixed(minX = 0.0, maxX = maxX, minY = 0.0, maxY = 1.0)
     }
 
-    CartesianChartHost(
-        chart = rememberCartesianChart(
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(lines),
-                rangeProvider = rangeProvider
-            ),
-            marker = inspectMarker,
-            markerVisibilityListener = inspect?.visibilityListener,
-            markerController = markerController,
-            decorations = beltDecorations,
-            startAxis = VerticalAxis.rememberStart(
-                label = rememberTextComponent(
-                    style = TextStyle(color = Color.Transparent),
-                    minWidth = TextComponent.MinWidth.fixed(30.dp)
+    // Keep the time axis and programmatic scrolling LTR in every app language.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(lines),
+                    rangeProvider = rangeProvider
                 ),
-                tick = rememberAxisTickComponent(fill = Fill(Color.Transparent)),
-                itemPlacer = remember { VerticalAxis.ItemPlacer.count({ 2 }) }
+                marker = inspectMarker,
+                markerVisibilityListener = inspect?.visibilityListener,
+                markerController = markerController,
+                decorations = beltDecorations,
+                startAxis = VerticalAxis.rememberStart(
+                    label = rememberTextComponent(
+                        style = TextStyle(color = Color.Transparent),
+                        minWidth = TextComponent.MinWidth.fixed(30.dp)
+                    ),
+                    tick = rememberAxisTickComponent(fill = Fill(Color.Transparent)),
+                    itemPlacer = remember { VerticalAxis.ItemPlacer.count({ 2 }) }
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = timeFormatter,
+                    itemPlacer = bottomAxisItemPlacer,
+                    label = null,
+                    tick = null
+                ),
+                getXStep = { _, _, _ -> 1.0 }
             ),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                valueFormatter = timeFormatter,
-                itemPlacer = bottomAxisItemPlacer,
-                label = null,
-                tick = null
-            ),
-            getXStep = { _, _, _ -> 1.0 }
-        ),
-        modelProducer = modelProducer,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        scrollState = scrollState,
-        zoomState = zoomState
-    )
+            modelProducer = modelProducer,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            scrollState = scrollState,
+            zoomState = zoomState
+        )
+    }
 }
 
 /**
