@@ -28,7 +28,7 @@ fun VersionOverlay(
             else                                                                      -> colors.versionUncommitted
         }
         Text(
-            text = "${config.VERSION_NAME} (${config.HEAD.substring(0, minOf(4, config.HEAD.length))})",
+            text = "${config.VERSION_NAME}-ltr (${config.HEAD.substring(0, minOf(4, config.HEAD.length))})",
             color = versionColor,
             fontSize = 10.sp,
             // Own line height: the inherited one (24 sp) made the box of this one line as tall as a
